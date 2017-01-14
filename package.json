@@ -1,0 +1,24 @@
+{
+    "author": "banting.lu.0514@gmail.com",
+    "dependencies": {},
+    "keywords": [],
+    "name": "pebbleaccelerometer",
+    "pebble": {
+        "displayName": "PebbleAccelerometer",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt"
+        ],
+        "uuid": "4e936a26-d612-4a16-b51c-7d72b0832e89",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
