@@ -1,5 +1,5 @@
 #include <pebble.h>
-
+#define SOME_NUMBER 10
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 
 static Window *s_main_window;
