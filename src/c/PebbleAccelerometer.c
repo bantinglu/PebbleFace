@@ -2,9 +2,56 @@
 
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 
+static const uint32_t MESSAGE_KEY_RequestData = 0x00;
 static Window *s_main_window;
+
 static TextLayer *s_time_layer;
-static bool isCapturing = false;
+
+enum Pebble_Keys {
+  PP_KEY_CMD  = 128,
+  PP_KEY_X    = 1,
+  PP_KEY_Y    = 2,
+  PP_KEY_Z    = 3,
+};
+
+static char * AppMessageResult_to_String(AppMessageResult error)
+{
+  switch (error) {
+    case APP_MSG_OK:                          return "OK";
+    case APP_MSG_SEND_TIMEOUT:                return "SEND_TIMEOUT";
+    case APP_MSG_NOT_CONNECTED:               return "NOT_CONNECTED";
+    case APP_MSG_APP_NOT_RUNNING:             return "APP_NOT_RUNNING";
+    case APP_MSG_INVALID_ARGS:                return "INVALID_ARGS";
+    case APP_MSG_BUSY:                        return "BUSY";
+    case APP_MSG_BUFFER_OVERFLOW:             return "BUFFER_OVERFLOW";
+    case APP_MSG_ALREADY_RELEASED:            return "ALREADY_RELEASED";
+    case APP_MSG_CALLBACK_ALREADY_REGISTERED: return "CALLBACK_ALREADY_REGISTERED";
+    case APP_MSG_CALLBACK_NOT_REGISTERED:     return "CALLBACK_NOT_REGISTERED";
+    case APP_MSG_OUT_OF_MEMORY:               return "OUT_OF_MEMORY";
+    case APP_MSG_CLOSED:                      return "CLOSED";
+    case APP_MSG_INTERNAL_ERROR:              return "INTERNAL_ERROR";
+    default:                                  return "unknown";
+  }
+}
+
+void out_sent_handler(DictionaryIterator *sent, void *context) {
+  // outgoing message was delivered
+}
+
+
+void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  // outgoing message failed
+}
+
+
+void in_received_handler(DictionaryIterator *received, void *context) {
+  // incoming message received
+}
+
+
+void in_dropped_handler(AppMessageResult reason, void *context) {
+  // incoming message dropped
+}
 
 static void main_window_load(Window *window)
 {
@@ -32,27 +79,40 @@ static void main_window_unload(Window *window)
   text_layer_destroy(s_time_layer);
 }
 
-static void accel_data_callback(void * data, uint32_t num_samples)
+static void send()
 {
-  AppMessageResult result;
-  AccelData * vector = (AccelData*) data;
-  APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", (int) vector->x);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", (int) vector->y);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", (int) vector->z);
-}
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // A single click has just occured
-  APP_LOG(APP_LOG_LEVEL_INFO, "Button clicked", NULL);
-  isCapturing  = !isCapturing;
-  APP_LOG(APP_LOG_LEVEL_INFO, "Capture Mode: %s", isCapturing ? "true" : "false");
-  if(isCapturing)
-  {
-    accel_data_service_subscribe(1, (AccelDataHandler) accel_data_callback);
-  }
+  
+  //connection_service_subscribe(connection_handler_callback);
+  bool connected = connection_service_peek_pebblekit_connection();
+  APP_LOG(APP_LOG_LEVEL_INFO, "%d", connected);
+  
+  // Declare the dictionary's iterator
+  DictionaryIterator i;
+  DictionaryIterator *iter = &i;
+  
+  // Prepare the outbox buffer for this message
+  AppMessageResult result = app_message_outbox_begin(&iter);
+  if(result == APP_MSG_OK) {
+    int value = 0;
+    dict_write_int(iter, MESSAGE_KEY_RequestData, &value, sizeof(int), true);
+  
+    // Send this message
+    result = app_message_outbox_send();
+    
+    if(result != APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
+    }
+  } 
   else 
   {
-    accel_data_service_unsubscribe();
+    // The outbox cannot be used right now
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
   }
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+ send();
 }
 
 static void click_config_provider(void *context) {
@@ -60,16 +120,11 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
-static void accel_tap_callback(AccelAxisType axis, uint32_t direction)
-{
-  APP_LOG(APP_LOG_LEVEL_INFO, "In Tap CallBacks", NULL);
-}
-
 static void capture()
 {
     accel_service_set_sampling_rate(ACCEL_SAMPLE_RATE );  
-    accel_tap_service_subscribe((AccelTapHandler) accel_tap_callback);
 }
+
 
 static void init()
 {
@@ -86,6 +141,14 @@ static void init()
   window_stack_push(s_main_window, true);
   
   window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
+  
+  app_message_register_inbox_received(in_received_handler);
+  app_message_register_inbox_dropped(in_dropped_handler);
+  app_message_register_outbox_sent(out_sent_handler);
+  app_message_register_outbox_failed(out_failed_handler);
+  const uint32_t inbound_size = 64;
+  const uint32_t outbound_size = 64;
+  app_message_open(inbound_size, outbound_size);
 }
 
 static void deinit()
@@ -96,8 +159,7 @@ static void deinit()
 int main(void)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "main: entry:  %s %s", __TIME__, __DATE__);
-  init();
-  capture();
+  init();;
   app_event_loop();
   deinit();
 }

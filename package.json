@@ -4,6 +4,9 @@
     "keywords": [],
     "name": "pebbleaccelerometer",
     "pebble": {
+        "capabilities": [
+            "location"
+        ],
         "displayName": "PebbleAccelerometer",
         "enableMultiJS": true,
         "messageKeys": [],
@@ -13,7 +16,11 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt"
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "emery"
         ],
         "uuid": "4e936a26-d612-4a16-b51c-7d72b0832e89",
         "watchapp": {
