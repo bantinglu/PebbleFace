@@ -2,6 +2,7 @@ package com.example.ben.androidgesture;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -9,6 +10,8 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 import java.util.UUID;
+import android.os.Vibrator;
+import android.widget.TextView;
 
 
 /**
@@ -26,25 +29,56 @@ public class PebbleReceiver extends Activity {
     private static final int PP_KEY_Z   = 3;
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
-    private static final UUID PEBBLE_UUID = UUID.fromString("273761eb-97dc-4f08-b353-3384a2170902");
-
+    private static final UUID PEBBLE_UUID = UUID.fromString("cf30b8b5-2cee-4f3a-bec8-234523a3ffe4");
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onCreate(Bundle savedInstance)
+    {
+        super.onCreate(savedInstance);
+        setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "onResume: ");
+        /*
+        PebbleDictionary dict = new PebbleDictionary();
+        final int AppKeyContactName = 0;
+        final int AppKeyAge = 1;
 
-        final Handler handler = new Handler();
+        final String contactName = "sheldon";
+        final int age = 12;
+
+        dict.addString(AppKeyContactName, contactName);
+        dict.addInt32(AppKeyAge, age);
+        PebbleKit.sendDataToPebble(getApplicationContext(), PEBBLE_UUID, dict);*/
 
         dataReceiver = new PebbleKit.PebbleDataReceiver(PEBBLE_UUID)
         {
             @Override
             public void receiveData(final Context context, final int transactionId, final PebbleDictionary dict)
             {
-                PebbleKit.registerReceivedDataHandler(getApplicationContext(), dataReceiver);
-                Long number = dict.getInteger(PP_KEY_CMD);
+                PebbleKit.sendAckToPebble(context, transactionId);
             }
         };
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume: ");
+
+        PebbleKit.startAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+
+        PebbleKit.registerReceivedDataHandler(getApplicationContext(), dataReceiver);
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Log.i(TAG, "onPause: ");
+
+        if (dataReceiver != null) {
+            unregisterReceiver(dataReceiver);
+            dataReceiver = null;
+        }
+        PebbleKit.closeAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+    }
+
 }
