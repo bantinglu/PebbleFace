@@ -43,7 +43,18 @@ public class PebbleReceiver extends Activity {
 
     private void updateScreen()
     {
+        final String x = "X:" + vector[VECTOR_INDEX_X];
+        final String y = "Y:" + vector[VECTOR_INDEX_Y];
+        final String z = "Z:" + vector[VECTOR_INDEX_Z];
 
+        TextView xAccelAxis = (TextView) findViewById(R.id.accelerometerX);
+        xAccelAxis.setText(x);
+
+        TextView yAccelAxis = (TextView) findViewById(R.id.accelerometerY);
+        yAccelAxis.setText(y);
+
+        TextView zAccelAxis = (TextView) findViewById(R.id.accelerometerZ);
+        zAccelAxis.setText(z);
     }
 
     @Override
