@@ -62,6 +62,8 @@ public class PebbleReceiver extends Activity {
     {
         super.onCreate(savedInstance);
         setContentView(R.layout.activity_main);
+        PebbleKit.startAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+        final Handler handler = new Handler();
 
         dataReceiver = new PebbleKit.PebbleDataReceiver(PEBBLE_UUID)
         {
@@ -103,9 +105,7 @@ public class PebbleReceiver extends Activity {
         super.onResume();
         Log.i(TAG, "onResume: ");
 
-        PebbleKit.startAppOnPebble(getApplicationContext(), PEBBLE_UUID);
-
-        PebbleKit.registerReceivedDataHandler(getApplicationContext(), dataReceiver);
+        PebbleKit.registerReceivedDataHandler(this, dataReceiver);
 
     }
     @Override
