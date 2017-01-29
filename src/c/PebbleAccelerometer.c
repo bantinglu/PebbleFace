@@ -1,11 +1,16 @@
 #include <pebble.h>
 
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
+#define SAMPLES_PER_CALLBACK  1
 
-static const uint32_t MESSAGE_KEY_RequestData = 0x00;
+#define SYNC_BUFFER_SIZE      48
+
 static Window *s_main_window;
+static bool isCapturing = false;
+
 
 static TextLayer *s_time_layer;
+static int      syncChangeCount = 0;
 
 enum Pebble_Keys {
   PP_KEY_CMD  = 128,
@@ -14,43 +19,43 @@ enum Pebble_Keys {
   PP_KEY_Z    = 3,
 };
 
-static char * AppMessageResult_to_String(AppMessageResult error)
-{
-  switch (error) {
-    case APP_MSG_OK:                          return "OK";
-    case APP_MSG_SEND_TIMEOUT:                return "SEND_TIMEOUT";
-    case APP_MSG_NOT_CONNECTED:               return "NOT_CONNECTED";
-    case APP_MSG_APP_NOT_RUNNING:             return "APP_NOT_RUNNING";
-    case APP_MSG_INVALID_ARGS:                return "INVALID_ARGS";
-    case APP_MSG_BUSY:                        return "BUSY";
-    case APP_MSG_BUFFER_OVERFLOW:             return "BUFFER_OVERFLOW";
-    case APP_MSG_ALREADY_RELEASED:            return "ALREADY_RELEASED";
-    case APP_MSG_CALLBACK_ALREADY_REGISTERED: return "CALLBACK_ALREADY_REGISTERED";
-    case APP_MSG_CALLBACK_NOT_REGISTERED:     return "CALLBACK_NOT_REGISTERED";
-    case APP_MSG_OUT_OF_MEMORY:               return "OUT_OF_MEMORY";
-    case APP_MSG_CLOSED:                      return "CLOSED";
-    case APP_MSG_INTERNAL_ERROR:              return "INTERNAL_ERROR";
-    default:                                  return "unknown";
-  }
-}
+enum PebblePointer_Cmd_Values {
+  PP_CMD_INVALID = 0,
+  PP_CMD_VECTOR  = 1,
+};
+
+typedef struct {
+  uint64_t    sync_set;
+  uint64_t    sync_vib;
+  uint64_t    sync_missed;
+} sync_stats_t;
+
+static sync_stats_t   syncStats = {0, 0, 0};
+
+static bool isBlocked = false;;
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
   // outgoing message was delivered
+  isBlocked = false;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby!: outbox");
 }
 
 
 void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
   // outgoing message failed
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message Sent Failed. Reason: %d", (int)reason);
 }
 
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   // incoming message received
+  APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby! : inbox");
 }
 
 
 void in_dropped_handler(AppMessageResult reason, void *context) {
   // incoming message dropped
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped. Reason: %d", (int)reason);
 }
 
 static void main_window_load(Window *window)
@@ -69,9 +74,12 @@ static void main_window_load(Window *window)
   text_layer_set_text(s_time_layer, "Banting's APP");
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+ 
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));}
+  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
+}
+
 
 static void main_window_unload(Window *window)
 {
@@ -79,23 +87,40 @@ static void main_window_unload(Window *window)
   text_layer_destroy(s_time_layer);
 }
 
-static void send()
+static void accel_data_callback(void * data, uint32_t num_samples)
 {
   
   //connection_service_subscribe(connection_handler_callback);
-  bool connected = connection_service_peek_pebblekit_connection();
-  APP_LOG(APP_LOG_LEVEL_INFO, "%d", connected);
+  AccelData *accel = (AccelData*) data;
+  
+  if(isBlocked)
+    return;
   
   // Declare the dictionary's iterator
-  DictionaryIterator i;
-  DictionaryIterator *iter = &i;
+  DictionaryIterator *iter;
   
   // Prepare the outbox buffer for this message
   AppMessageResult result = app_message_outbox_begin(&iter);
   if(result == APP_MSG_OK) {
-    int value = 0;
-    dict_write_int(iter, MESSAGE_KEY_RequestData, &value, sizeof(int), true);
-  
+    
+    Tuplet vector[] = {TupletInteger(PP_KEY_CMD, PP_CMD_VECTOR),
+                       TupletInteger(PP_KEY_X, (int)accel->x),
+                       TupletInteger(PP_KEY_Y, (int)accel->y),
+                       TupletInteger(PP_KEY_Z, (int)accel->z)};
+    
+    
+    uint8_t buffer[256];
+    uint32_t size = sizeof(buffer);
+    //dict_serialize_tuplets_to_buffer_with_iter(iter, vector, ARRAY_LENGTH(vector), buffer, &size);*/
+    //dict_write_int(iter, PP_KEY_CMD, &value, sizeof(int), true);
+    dict_write_tuplet(iter, &vector[0]);
+    dict_write_tuplet(iter, &vector[1]);
+    dict_write_tuplet(iter, &vector[2]);
+    dict_write_tuplet(iter, &vector[3]);
+    
+    //dict_serialize_tuplets_to_buffer(vector, 4, buffer, &size);
+
+    
     // Send this message
     result = app_message_outbox_send();
     
@@ -103,26 +128,35 @@ static void send()
     {
       APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
     }
+    else if(result == APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_INFO, "send waiting for callabck");
+      isBlocked = true;
+    }
   } 
   else 
   {
     // The outbox cannot be used right now
     APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
   }
-}
+} 
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
- send();
+  isCapturing  = !isCapturing;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Capture Mode: %s", isCapturing ? "true" : "false");
+  if(isCapturing)
+  {
+    accel_data_service_subscribe(1, (AccelDataHandler) accel_data_callback);
+  }
+  else 
+  {
+    accel_data_service_unsubscribe();
+  }
 }
 
 static void click_config_provider(void *context) {
   // Subcribe to button click events here
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-}
-
-static void capture()
-{
-    accel_service_set_sampling_rate(ACCEL_SAMPLE_RATE );  
 }
 
 
@@ -146,8 +180,8 @@ static void init()
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_outbox_sent(out_sent_handler);
   app_message_register_outbox_failed(out_failed_handler);
-  const uint32_t inbound_size = 64;
-  const uint32_t outbound_size = 64;
+  const uint32_t inbound_size = 128;
+  const uint32_t outbound_size = 128;
   app_message_open(inbound_size, outbound_size);
 }
 
