@@ -2,6 +2,8 @@
 
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 
+#define myName EVAN
+
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static bool isCapturing = false;
