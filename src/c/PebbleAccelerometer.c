@@ -7,53 +7,48 @@
 
 static Window *s_main_window;
 static bool isCapturing = false;
-
-
 static TextLayer *s_time_layer;
-static int      syncChangeCount = 0;
 
-enum Pebble_Keys {
+enum Pebble_Keys 
+{
   PP_KEY_CMD  = 128,
   PP_KEY_X    = 1,
   PP_KEY_Y    = 2,
   PP_KEY_Z    = 3,
 };
 
-enum PebblePointer_Cmd_Values {
+enum PebblePointer_Cmd_Values
+{
   PP_CMD_INVALID = 0,
   PP_CMD_VECTOR  = 1,
 };
 
-typedef struct {
-  uint64_t    sync_set;
-  uint64_t    sync_vib;
-  uint64_t    sync_missed;
-} sync_stats_t;
+static bool isBlocked = false;
 
-static sync_stats_t   syncStats = {0, 0, 0};
-
-static bool isBlocked = false;;
-
-void out_sent_handler(DictionaryIterator *sent, void *context) {
+void out_sent_handler(DictionaryIterator *sent, void *context) 
+{
   // outgoing message was delivered
   isBlocked = false;
   APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby!: outbox");
 }
 
 
-void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context)
+{
   // outgoing message failed
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message Sent Failed. Reason: %d", (int)reason);
 }
 
 
-void in_received_handler(DictionaryIterator *received, void *context) {
+void in_received_handler(DictionaryIterator *received, void *context) 
+{
   // incoming message received
   APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby! : inbox");
 }
 
 
-void in_dropped_handler(AppMessageResult reason, void *context) {
+void in_dropped_handler(AppMessageResult reason, void *context) 
+{
   // incoming message dropped
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped. Reason: %d", (int)reason);
 }
@@ -107,20 +102,13 @@ static void accel_data_callback(void * data, uint32_t num_samples)
                        TupletInteger(PP_KEY_X, (int)accel->x),
                        TupletInteger(PP_KEY_Y, (int)accel->y),
                        TupletInteger(PP_KEY_Z, (int)accel->z)};
-    
-    
-    uint8_t buffer[256];
-    uint32_t size = sizeof(buffer);
-    //dict_serialize_tuplets_to_buffer_with_iter(iter, vector, ARRAY_LENGTH(vector), buffer, &size);*/
-    //dict_write_int(iter, PP_KEY_CMD, &value, sizeof(int), true);
+  
     dict_write_tuplet(iter, &vector[0]);
-    dict_write_tuplet(iter, &vector[1]);
-    dict_write_tuplet(iter, &vector[2]);
-    dict_write_tuplet(iter, &vector[3]);
-    
-    //dict_serialize_tuplets_to_buffer(vector, 4, buffer, &size);
+    dict_write_tuplet(iter, &vector[PP_KEY_X]);
+    dict_write_tuplet(iter, &vector[PP_KEY_Y]);
+    dict_write_tuplet(iter, &vector[PP_KEY_Z]);
 
-    
+  
     // Send this message
     result = app_message_outbox_send();
     
@@ -193,7 +181,7 @@ static void deinit()
 int main(void)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "main: entry:  %s %s", __TIME__, __DATE__);
-  init();;
+  init();
   app_event_loop();
   deinit();
 }
