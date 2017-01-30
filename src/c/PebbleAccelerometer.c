@@ -1,10 +1,57 @@
 #include <pebble.h>
 
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
+#define SAMPLES_PER_CALLBACK  1
+
+#define SYNC_BUFFER_SIZE      48
 
 static Window *s_main_window;
-static TextLayer *s_time_layer;
 static bool isCapturing = false;
+static TextLayer *s_time_layer;
+
+enum Pebble_Keys 
+{
+  PP_KEY_CMD  = 128,
+  PP_KEY_X    = 1,
+  PP_KEY_Y    = 2,
+  PP_KEY_Z    = 3,
+};
+
+enum PebblePointer_Cmd_Values
+{
+  PP_CMD_INVALID = 0,
+  PP_CMD_VECTOR  = 1,
+};
+
+static bool isBlocked = false;
+
+void out_sent_handler(DictionaryIterator *sent, void *context) 
+{
+  // outgoing message was delivered
+  isBlocked = false;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby!: outbox");
+}
+
+
+void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context)
+{
+  // outgoing message failed
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message Sent Failed. Reason: %d", (int)reason);
+}
+
+
+void in_received_handler(DictionaryIterator *received, void *context) 
+{
+  // incoming message received
+  APP_LOG(APP_LOG_LEVEL_INFO, "Booyah Baby! : inbox");
+}
+
+
+void in_dropped_handler(AppMessageResult reason, void *context) 
+{
+  // incoming message dropped
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped. Reason: %d", (int)reason);
+}
 
 static void main_window_load(Window *window)
 {
@@ -22,9 +69,12 @@ static void main_window_load(Window *window)
   text_layer_set_text(s_time_layer, "Banting's APP");
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+ 
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));}
+  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
+}
+
 
 static void main_window_unload(Window *window)
 {
@@ -34,15 +84,52 @@ static void main_window_unload(Window *window)
 
 static void accel_data_callback(void * data, uint32_t num_samples)
 {
-  AppMessageResult result;
-  AccelData * vector = (AccelData*) data;
-  APP_LOG(APP_LOG_LEVEL_INFO, "X: %d", (int) vector->x);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", (int) vector->y);
-  APP_LOG(APP_LOG_LEVEL_INFO, "Y: %d", (int) vector->z);
-}
+  
+  //connection_service_subscribe(connection_handler_callback);
+  AccelData *accel = (AccelData*) data;
+  
+  if(isBlocked)
+    return;
+  
+  // Declare the dictionary's iterator
+  DictionaryIterator *iter;
+  
+  // Prepare the outbox buffer for this message
+  AppMessageResult result = app_message_outbox_begin(&iter);
+  if(result == APP_MSG_OK) {
+    
+    Tuplet vector[] = {TupletInteger(PP_KEY_CMD, PP_CMD_VECTOR),
+                       TupletInteger(PP_KEY_X, (int)accel->x),
+                       TupletInteger(PP_KEY_Y, (int)accel->y),
+                       TupletInteger(PP_KEY_Z, (int)accel->z)};
+  
+    dict_write_tuplet(iter, &vector[0]);
+    dict_write_tuplet(iter, &vector[PP_KEY_X]);
+    dict_write_tuplet(iter, &vector[PP_KEY_Y]);
+    dict_write_tuplet(iter, &vector[PP_KEY_Z]);
+
+  
+    // Send this message
+    result = app_message_outbox_send();
+    
+    if(result != APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
+    }
+    else if(result == APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_INFO, "send waiting for callabck");
+      isBlocked = true;
+    }
+  } 
+  else 
+  {
+    // The outbox cannot be used right now
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
+  }
+} 
+
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // A single click has just occured
-  APP_LOG(APP_LOG_LEVEL_INFO, "Button clicked", NULL);
   isCapturing  = !isCapturing;
   APP_LOG(APP_LOG_LEVEL_INFO, "Capture Mode: %s", isCapturing ? "true" : "false");
   if(isCapturing)
@@ -60,16 +147,6 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
 
-static void accel_tap_callback(AccelAxisType axis, uint32_t direction)
-{
-  APP_LOG(APP_LOG_LEVEL_INFO, "In Tap CallBacks", NULL);
-}
-
-static void capture()
-{
-    accel_service_set_sampling_rate(ACCEL_SAMPLE_RATE );  
-    accel_tap_service_subscribe((AccelTapHandler) accel_tap_callback);
-}
 
 static void init()
 {
@@ -86,6 +163,14 @@ static void init()
   window_stack_push(s_main_window, true);
   
   window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
+  
+  app_message_register_inbox_received(in_received_handler);
+  app_message_register_inbox_dropped(in_dropped_handler);
+  app_message_register_outbox_sent(out_sent_handler);
+  app_message_register_outbox_failed(out_failed_handler);
+  const uint32_t inbound_size = 128;
+  const uint32_t outbound_size = 128;
+  app_message_open(inbound_size, outbound_size);
 }
 
 static void deinit()
@@ -97,7 +182,6 @@ int main(void)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "main: entry:  %s %s", __TIME__, __DATE__);
   init();
-  capture();
   app_event_loop();
   deinit();
 }
