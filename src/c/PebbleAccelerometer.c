@@ -5,6 +5,8 @@
 
 #define SYNC_BUFFER_SIZE      48
 
+static const int DONE_KEY = 64;
+
 static Window *s_main_window;
 static bool isCapturing = false;
 static TextLayer *s_time_layer;
@@ -84,8 +86,6 @@ static void main_window_unload(Window *window)
 
 static void accel_data_callback(void * data, uint32_t num_samples)
 {
-  
-  //connection_service_subscribe(connection_handler_callback);
   AccelData *accel = (AccelData*) data;
   
   if(isBlocked)
@@ -129,7 +129,46 @@ static void accel_data_callback(void * data, uint32_t num_samples)
   }
 } 
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+
+void send_end_ack()
+{
+  DictionaryIterator *iter;
+
+  // Prepare the outbox buffer for this message
+  
+ 
+  APP_LOG(APP_LOG_LEVEL_INFO,"Is Blocked: %s", isBlocked ? "true" : "false");
+  
+  
+  do
+  {
+    AppMessageResult result = app_message_outbox_begin(&iter);
+  } while(result != APP_MSG_OK);
+    
+  if(result == APP_MSG_OK) 
+  {  
+    dict_write_int(iter, PP_KEY_CMD, &DONE_KEY, sizeof(int), true);
+    result = app_message_outbox_send();
+    
+    if(result != APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
+    }
+    else if(result == APP_MSG_OK)
+    {
+      APP_LOG(APP_LOG_LEVEL_INFO, "send waiting for callabck");
+      isBlocked = true;
+    }
+  }
+  else 
+  {
+    // The outbox cannot be used right now
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
+  }
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) 
+{
   isCapturing  = !isCapturing;
   APP_LOG(APP_LOG_LEVEL_INFO, "Capture Mode: %s", isCapturing ? "true" : "false");
   if(isCapturing)
@@ -139,10 +178,12 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   else 
   {
     accel_data_service_unsubscribe();
+    send_end_ack();
   }
 }
 
-static void click_config_provider(void *context) {
+static void click_config_provider(void *context) 
+{
   // Subcribe to button click events here
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
