@@ -31,6 +31,7 @@ public class PebbleReceiver extends Activity {
     @SuppressWarnings("unused")
     private static final int PP_CMD_INVALID = 0;
     private static final int PP_CMD_VECTOR  = 1;
+    private static final int PP_CMD_DONE    = 64;
 
     private static final int VECTOR_INDEX_X  = 0;
     private static final int VECTOR_INDEX_Y  = 1;
@@ -41,11 +42,20 @@ public class PebbleReceiver extends Activity {
     private PebbleKit.PebbleDataReceiver dataReceiver;
     private static final UUID PEBBLE_UUID = UUID.fromString("cf30b8b5-2cee-4f3a-bec8-234523a3ffe4");
 
+
+    private DataHolder pebbleAccelDataHolder;
+
     private void updateScreen()
     {
         final String x = "X:" + vector[VECTOR_INDEX_X];
         final String y = "Y:" + vector[VECTOR_INDEX_Y];
         final String z = "Z:" + vector[VECTOR_INDEX_Z];
+
+        AccelData ad = new AccelData(vector[VECTOR_INDEX_X],
+                                     vector[VECTOR_INDEX_Y],
+                                     vector[VECTOR_INDEX_Z]);
+
+        pebbleAccelDataHolder.pushToCurrentSet(ad);
 
         TextView xAccelAxis = (TextView) findViewById(R.id.accelerometerX);
         xAccelAxis.setText(x);
@@ -61,6 +71,7 @@ public class PebbleReceiver extends Activity {
     public void onCreate(Bundle savedInstance)
     {
         super.onCreate(savedInstance);
+        pebbleAccelDataHolder  = new DataHolder();
         setContentView(R.layout.activity_main);
         PebbleKit.startAppOnPebble(getApplicationContext(), PEBBLE_UUID);
         final Handler handler = new Handler();
@@ -95,6 +106,11 @@ public class PebbleReceiver extends Activity {
                     }
 
                 }
+                else if (cmdValue.intValue() == PP_CMD_DONE)
+                {
+                    pebbleAccelDataHolder.saveCurrentSet();
+                }
+
                 updateScreen();
             }
         };
