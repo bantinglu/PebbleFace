@@ -16,7 +16,7 @@
         android:textSize="32sp"
         android:text="X: " />
 
-    <TextView android:id="@+id/accelerometerZ"
+    <TextView android:id="@+id/accelerometerY"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="32sp"
@@ -26,7 +26,7 @@
         android:layout_marginStart="0dp"
         android:layout_marginTop="60dp" /> a/>
 
-    <TextView android:id="@+id/accelerometerY"
+    <TextView android:id="@+id/accelerometerZ"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="32sp"
