@@ -1,5 +1,4 @@
 #include <pebble.h>
-#define SOME_NUMBER 10
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 #define SAMPLES_PER_CALLBACK  1
 

@@ -143,7 +143,7 @@ public class PebbleReceiver extends Activity {
         PebbleKit.closeAppOnPebble(getApplicationContext(), PEBBLE_UUID);
     }
 
-    public void saveDataToFile(String x, String y, String z){
+    public void saveDataToFile(final String x, final String y, final String z){
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -154,7 +154,7 @@ public class PebbleReceiver extends Activity {
             }
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
-            outWriter.append(x + " " + y + " " + z + " " + timestamp.toString());
+            outWriter.append("X: " + x + " Y: " + y + " Z: " + z + " " + timestamp.toString());
             outWriter.close();
             fOut.close();
 
