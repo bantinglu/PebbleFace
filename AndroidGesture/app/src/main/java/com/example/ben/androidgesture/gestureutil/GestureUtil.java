@@ -1,4 +1,4 @@
-package com.example.ben.androidgesture;
+package com.example.ben.androidgesture.gestureutil;
 import java.util.*;
 
 /**
