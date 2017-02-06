@@ -2,6 +2,7 @@ package com.example.ben.androidgesture;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.view.View;
@@ -22,6 +23,10 @@ public class MainActivity extends ListActivity
     }
 
     @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+    }
     protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
         Intent intent = null;
         switch (position) {

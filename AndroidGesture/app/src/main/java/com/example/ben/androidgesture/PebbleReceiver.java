@@ -3,6 +3,7 @@ package com.example.ben.androidgesture;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
@@ -10,6 +11,8 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 import java.util.UUID;
+import java.io.*;
+import java.sql.Timestamp;
 import android.os.Vibrator;
 import android.widget.TextView;
 
@@ -21,6 +24,7 @@ import android.widget.TextView;
 public class PebbleReceiver extends Activity {
 
     private static final String TAG = "PebblePointer";
+    private static final String DIRECTORY_PATH = Environment.getExternalStorageDirectory().toString();
 
     // The tuple key corresponding to a vector received from the watch
     private static final int PP_KEY_CMD = 128;
@@ -65,6 +69,8 @@ public class PebbleReceiver extends Activity {
 
         TextView zAccelAxis = (TextView) findViewById(R.id.accelerometerZ);
         zAccelAxis.setText(z);
+
+        saveDataToFile(x, y, z);
     }
 
     @Override
@@ -135,6 +141,26 @@ public class PebbleReceiver extends Activity {
             dataReceiver = null;
         }
         PebbleKit.closeAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+    }
+
+    public void saveDataToFile(final String x, final String y, final String z){
+
+        try {
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            File root = new File(DIRECTORY_PATH);
+            File file = new File(root, "logFile.txt");
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileOutputStream fOut = new FileOutputStream(file);
+            OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
+            outWriter.append("X: " + x + " Y: " + y + " Z: " + z + " " + timestamp.toString());
+            outWriter.close();
+            fOut.close();
+
+        } catch(IOException e){
+            Log.e(TAG, "Failed when saving data to text file");
+        }
     }
 
 }

@@ -1,12 +1,10 @@
 #include <pebble.h>
-
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 #define SAMPLES_PER_CALLBACK  1
 
 #define SYNC_BUFFER_SIZE      48
 
 static const int DONE_KEY = 64;
-
 static Window *s_main_window;
 static bool isCapturing = false;
 static TextLayer *s_time_layer;
@@ -84,7 +82,7 @@ static void main_window_unload(Window *window)
   text_layer_destroy(s_time_layer);
 }
 
-static void accel_data_callback(void * data, uint32_t num_samples)
+static void send()
 {
   AccelData *accel = (AccelData*) data;
   
@@ -187,7 +185,6 @@ static void click_config_provider(void *context)
   // Subcribe to button click events here
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
-
 
 static void init()
 {
