@@ -34,4 +34,8 @@ public class DataHolder {
         //temporary return
         return null;
     }
+    public List<AccelData> popData()
+    {
+        return dataHolder.get(dataHolder.size() - 1);
+    }
 }
