@@ -148,13 +148,13 @@ public class PebbleReceiver extends Activity {
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             File root = new File(DIRECTORY_PATH);
-            File file = new File(root, "logFile.txt");
+            File file = new File(root, "GestureData.csv");
             if(!file.exists()){
                 file.createNewFile();
             }
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
-            outWriter.append("X: " + x + " Y: " + y + " Z: " + z + " " + timestamp.toString());
+            outWriter.append(x + "," + y + "," + z + "," + timestamp.toString());
             outWriter.close();
             fOut.close();
 
