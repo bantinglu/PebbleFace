@@ -1,4 +1,4 @@
-package com.example.ben.androidgesture.gestureutil;
+package com.example.ben.androidgesture.Utils;
 
 /**
  * Created by Sheldon on 2/1/2017.
