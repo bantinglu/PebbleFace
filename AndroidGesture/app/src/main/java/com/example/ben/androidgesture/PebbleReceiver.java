@@ -154,7 +154,7 @@ public class PebbleReceiver extends Activity {
             }
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
-            outWriter.append(x + "," + y + "," + z + "," + timestamp.toString());
+            outWriter.append(x + ", " + y + ", " + z + ", " + timestamp.toString());
             outWriter.close();
             fOut.close();
 
