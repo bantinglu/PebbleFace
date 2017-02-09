@@ -147,7 +147,6 @@ public class PebbleReceiver extends Activity {
     public void saveDataToFile(){
 
         try {
-            List<AccelData> lastDataSet = pebbleAccelDataHolder.popData();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             File root = new File(DIRECTORY_PATH);
             File file = new File(root, "GestureData.csv");
@@ -157,11 +156,9 @@ public class PebbleReceiver extends Activity {
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
             outWriter.append("START");
-            for(AccelData i : lastDataSet){
-                Integer x = i.getX();
-                Integer y = i.getY();
-                Integer z = i.getZ();
-                outWriter.append(x.toString() + ", " + y + ", " + z + ", " + timestamp.toString());
+            for(AccelData i : pebbleAccelDataHolder.popData()){
+                outWriter.append(Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
+                        + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString());
             }
             outWriter.append("END");
             outWriter.close();
