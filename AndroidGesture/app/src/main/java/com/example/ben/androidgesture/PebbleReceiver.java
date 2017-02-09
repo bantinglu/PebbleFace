@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
+import com.example.ben.androidgesture.Constants.AndroidConstants;
 
 import java.util.UUID;
 import java.io.*;
@@ -17,47 +18,31 @@ import android.os.Vibrator;
 import android.widget.TextView;
 
 
+
 /**
  * Created by ben on 1/18/2017.
  */
 
 public class PebbleReceiver extends Activity {
 
-    private static final String TAG = "PebblePointer";
-    private static final String DIRECTORY_PATH = Environment.getExternalStorageDirectory().toString();
-
-    // The tuple key corresponding to a vector received from the watch
-    private static final int PP_KEY_CMD = 128;
-    private static final int PP_KEY_X   = 1;
-    private static final int PP_KEY_Y   = 2;
-    private static final int PP_KEY_Z   = 3;
-
-    @SuppressWarnings("unused")
-    private static final int PP_CMD_INVALID = 0;
-    private static final int PP_CMD_VECTOR  = 1;
-    private static final int PP_CMD_DONE    = 64;
-
-    private static final int VECTOR_INDEX_X  = 0;
-    private static final int VECTOR_INDEX_Y  = 1;
-    private static final int VECTOR_INDEX_Z  = 2;
 
     private static int vector[] = new int[3];
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
-    private static final UUID PEBBLE_UUID = UUID.fromString("cf30b8b5-2cee-4f3a-bec8-234523a3ffe4");
+
 
 
     private DataHolder pebbleAccelDataHolder;
 
     private void updateScreen()
     {
-        final String x = "X:" + vector[VECTOR_INDEX_X];
-        final String y = "Y:" + vector[VECTOR_INDEX_Y];
-        final String z = "Z:" + vector[VECTOR_INDEX_Z];
+        final String x = "X:" + vector[AndroidConstants.VECTOR_INDEX_X];
+        final String y = "Y:" + vector[AndroidConstants.VECTOR_INDEX_Y];
+        final String z = "Z:" + vector[AndroidConstants.VECTOR_INDEX_Z];
 
-        AccelData ad = new AccelData(vector[VECTOR_INDEX_X],
-                                     vector[VECTOR_INDEX_Y],
-                                     vector[VECTOR_INDEX_Z]);
+        AccelData ad = new AccelData(vector[AndroidConstants.VECTOR_INDEX_X],
+                                     vector[AndroidConstants.VECTOR_INDEX_Y],
+                                     vector[AndroidConstants.VECTOR_INDEX_Z]);
 
         pebbleAccelDataHolder.pushToCurrentSet(ad);
 
@@ -79,40 +64,40 @@ public class PebbleReceiver extends Activity {
         super.onCreate(savedInstance);
         pebbleAccelDataHolder  = new DataHolder();
         setContentView(R.layout.activity_main);
-        PebbleKit.startAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+        PebbleKit.startAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
         final Handler handler = new Handler();
 
-        dataReceiver = new PebbleKit.PebbleDataReceiver(PEBBLE_UUID)
+        dataReceiver = new PebbleKit.PebbleDataReceiver(AndroidConstants.PEBBLE_UUID)
         {
             @Override
             public void receiveData(final Context context, final int transactionId, final PebbleDictionary dict) {
                 PebbleKit.sendAckToPebble(context, transactionId);
 
-                final Long cmdValue = dict.getInteger(PP_KEY_CMD);
+                final Long cmdValue = dict.getInteger(AndroidConstants.PP_KEY_CMD);
                 if (cmdValue == null) {
                     return;
                 }
 
-                if (cmdValue.intValue() == PP_CMD_VECTOR) {
+                if (cmdValue.intValue() == AndroidConstants.PP_CMD_VECTOR) {
 
                     // Capture the received vector.
-                    final Long xValue = dict.getInteger(PP_KEY_X);
+                    final Long xValue = dict.getInteger(AndroidConstants.PP_KEY_X);
                     if (xValue != null) {
-                        vector[VECTOR_INDEX_X] = xValue.intValue();
+                        vector[AndroidConstants.VECTOR_INDEX_X] = xValue.intValue();
                     }
 
-                    final Long yValue = dict.getInteger(PP_KEY_Y);
+                    final Long yValue = dict.getInteger(AndroidConstants.PP_KEY_Y);
                     if (yValue != null) {
-                        vector[VECTOR_INDEX_Y] = yValue.intValue();
+                        vector[AndroidConstants.VECTOR_INDEX_Y] = yValue.intValue();
                     }
 
-                    final Long zValue = dict.getInteger(PP_KEY_Z);
+                    final Long zValue = dict.getInteger(AndroidConstants.PP_KEY_Z);
                     if (zValue != null) {
-                        vector[VECTOR_INDEX_Z] = zValue.intValue();
+                        vector[AndroidConstants.VECTOR_INDEX_Z] = zValue.intValue();
                     }
 
                 }
-                else if (cmdValue.intValue() == PP_CMD_DONE)
+                else if (cmdValue.intValue() == AndroidConstants.PP_CMD_DONE)
                 {
                     pebbleAccelDataHolder.saveCurrentSet();
                 }
@@ -125,8 +110,7 @@ public class PebbleReceiver extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume: ");
-
+        PebbleKit.startAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
         PebbleKit.registerReceivedDataHandler(this, dataReceiver);
 
     }
@@ -134,20 +118,18 @@ public class PebbleReceiver extends Activity {
     public void onPause() {
         super.onPause();
 
-        Log.i(TAG, "onPause: ");
-
         if (dataReceiver != null) {
             unregisterReceiver(dataReceiver);
             dataReceiver = null;
         }
-        PebbleKit.closeAppOnPebble(getApplicationContext(), PEBBLE_UUID);
+        PebbleKit.closeAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
     }
 
     public void saveDataToFile(final String x, final String y, final String z){
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File root = new File(DIRECTORY_PATH);
+            File root = new File(AndroidConstants.DIRECTORY_PATH);
             File file = new File(root, "logFile.txt");
             if(!file.exists()){
                 file.createNewFile();
@@ -159,7 +141,7 @@ public class PebbleReceiver extends Activity {
             fOut.close();
 
         } catch(IOException e){
-            Log.e(TAG, "Failed when saving data to text file");
+            Log.e("temp", "Failed when saving data to text file");
         }
     }
 
