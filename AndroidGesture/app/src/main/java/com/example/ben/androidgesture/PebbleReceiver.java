@@ -11,6 +11,7 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.example.ben.androidgesture.Constants.AndroidConstants;
 
+import java.util.List;
 import java.util.UUID;
 import java.io.*;
 import java.sql.Timestamp;
@@ -55,7 +56,6 @@ public class PebbleReceiver extends Activity {
         TextView zAccelAxis = (TextView) findViewById(R.id.accelerometerZ);
         zAccelAxis.setText(z);
 
-        saveDataToFile(x, y, z);
     }
 
     @Override
@@ -100,6 +100,7 @@ public class PebbleReceiver extends Activity {
                 else if (cmdValue.intValue() == AndroidConstants.PP_CMD_DONE)
                 {
                     pebbleAccelDataHolder.saveCurrentSet();
+                    saveDataToFile();
                 }
 
                 updateScreen();
@@ -125,21 +126,25 @@ public class PebbleReceiver extends Activity {
         PebbleKit.closeAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
     }
 
-    public void saveDataToFile(final String x, final String y, final String z){
+    public void saveDataToFile(){
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File root = new File(AndroidConstants.DIRECTORY_PATH);
-            File file = new File(root, "logFile.txt");
+            File root = new File(DIRECTORY_PATH);
+            File file = new File(root, "GestureData.csv");
             if(!file.exists()){
                 file.createNewFile();
             }
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
-            outWriter.append("X: " + x + " Y: " + y + " Z: " + z + " " + timestamp.toString());
+            outWriter.append("START");
+            for(AccelData i : pebbleAccelDataHolder.popData()){
+                outWriter.append(Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
+                        + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString());
+            }
+            outWriter.append("END");
             outWriter.close();
             fOut.close();
-
         } catch(IOException e){
             Log.e("temp", "Failed when saving data to text file");
         }
