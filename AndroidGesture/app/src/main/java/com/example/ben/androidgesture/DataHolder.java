@@ -1,5 +1,7 @@
 package com.example.ben.androidgesture;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,5 +39,9 @@ public class DataHolder {
     {
         //temporary return
         return null;
+    }
+    public List<AccelData> popData()
+    {
+        return dataHolder.get(dataHolder.size() - 1);
     }
 }
