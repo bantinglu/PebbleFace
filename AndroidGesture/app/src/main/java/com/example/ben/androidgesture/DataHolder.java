@@ -25,8 +25,12 @@ public class DataHolder {
 
     public void saveCurrentSet()
     {
-        dataHolder.add(currentDataSet);
-        currentDataSet = new ArrayList<AccelData>();
+        if(currentDataSet.size() != 0)
+        {
+            dataHolder.add(currentDataSet);
+            currentDataSet = new ArrayList<AccelData>();
+        }
+
     }
 
     public List<AccelData> normalizeData(final List<AccelData> nonNormalized)
