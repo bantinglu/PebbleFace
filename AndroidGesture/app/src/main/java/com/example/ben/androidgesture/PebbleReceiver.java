@@ -3,19 +3,18 @@ package com.example.ben.androidgesture;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.util.Log;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.example.ben.androidgesture.Constants.AndroidConstants;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import java.io.*;
 import java.sql.Timestamp;
-import android.os.Vibrator;
+
 import android.widget.TextView;
 
 
@@ -30,8 +29,8 @@ public class PebbleReceiver extends Activity {
     private static int vector[] = new int[3];
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
-
-
+    private Timer timer;
+    private boolean saveNext = false;
 
     private DataHolder pebbleAccelDataHolder;
 
@@ -62,16 +61,17 @@ public class PebbleReceiver extends Activity {
     public void onCreate(Bundle savedInstance)
     {
         super.onCreate(savedInstance);
+        timer = new Timer();
         pebbleAccelDataHolder  = new DataHolder();
         setContentView(R.layout.activity_main);
         PebbleKit.startAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
-        final Handler handler = new Handler();
 
         dataReceiver = new PebbleKit.PebbleDataReceiver(AndroidConstants.PEBBLE_UUID)
         {
             @Override
             public void receiveData(final Context context, final int transactionId, final PebbleDictionary dict) {
                 PebbleKit.sendAckToPebble(context, transactionId);
+                saveNext = true;
 
                 final Long cmdValue = dict.getInteger(AndroidConstants.PP_KEY_CMD);
                 if (cmdValue == null) {
@@ -97,13 +97,8 @@ public class PebbleReceiver extends Activity {
                     }
 
                 }
-                else if (cmdValue.intValue() == AndroidConstants.PP_CMD_DONE)
-                {
-                    pebbleAccelDataHolder.saveCurrentSet();
-                    saveDataToFile();
-                }
-
                 updateScreen();
+                resetTimer();
             }
         };
     }
@@ -130,7 +125,7 @@ public class PebbleReceiver extends Activity {
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File root = new File(DIRECTORY_PATH);
+            File root = new File(AndroidConstants.DIRECTORY_PATH);
             File file = new File(root, "GestureData.csv");
             if(!file.exists()){
                 file.createNewFile();
@@ -148,6 +143,19 @@ public class PebbleReceiver extends Activity {
         } catch(IOException e){
             Log.e("temp", "Failed when saving data to text file");
         }
+    }
+
+    private void resetTimer()
+    {
+        timer.cancel();
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                pebbleAccelDataHolder.saveCurrentSet();
+                saveDataToFile();
+            }
+        }, 2000);
     }
 
 }

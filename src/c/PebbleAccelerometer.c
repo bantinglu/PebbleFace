@@ -1,13 +1,15 @@
-#include <pebble.h>
 #define ACCEL_SAMPLE_RATE    ACCEL_SAMPLING_10HZ
 #define SAMPLES_PER_CALLBACK  1
 
-#define SYNC_BUFFER_SIZE      48
+#include <pebble.h>
 
 static const int DONE_KEY = 64;
+
 static Window *s_main_window;
 static bool isCapturing = false;
 static TextLayer *s_time_layer;
+static DictionaryIterator *iter;
+static bool isBlocked = false;
 
 enum Pebble_Keys 
 {
@@ -22,8 +24,6 @@ enum PebblePointer_Cmd_Values
   PP_CMD_INVALID = 0,
   PP_CMD_VECTOR  = 1,
 };
-
-static bool isBlocked = false;
 
 void out_sent_handler(DictionaryIterator *sent, void *context) 
 {
@@ -82,15 +82,15 @@ static void main_window_unload(Window *window)
   text_layer_destroy(s_time_layer);
 }
 
-static void send()
+static void accel_data_callback(void * data, uint32_t num_samples)
 {
   AccelData *accel = (AccelData*) data;
+
   
   if(isBlocked)
     return;
   
   // Declare the dictionary's iterator
-  DictionaryIterator *iter;
   
   // Prepare the outbox buffer for this message
   AppMessageResult result = app_message_outbox_begin(&iter);
@@ -124,25 +124,17 @@ static void send()
   {
     // The outbox cannot be used right now
     APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
+
   }
 } 
 
 
 void send_end_ack()
 {
-  DictionaryIterator *iter;
-
   // Prepare the outbox buffer for this message
-  
- 
   APP_LOG(APP_LOG_LEVEL_INFO,"Is Blocked: %s", isBlocked ? "true" : "false");
-  
-  
-  do
-  {
-    AppMessageResult result = app_message_outbox_begin(&iter);
-  } while(result != APP_MSG_OK);
-    
+  AppMessageResult result = app_message_outbox_begin(&iter);
+ 
   if(result == APP_MSG_OK) 
   {  
     dict_write_int(iter, PP_KEY_CMD, &DONE_KEY, sizeof(int), true);
@@ -150,20 +142,22 @@ void send_end_ack()
     
     if(result != APP_MSG_OK)
     {
-      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the outbox: %d", (int)result);
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending the end acknowledgement: %d", (int)result);
     }
     else if(result == APP_MSG_OK)
     {
-      APP_LOG(APP_LOG_LEVEL_INFO, "send waiting for callabck");
+      APP_LOG(APP_LOG_LEVEL_INFO, "send waiting for callback: end acknowledgement");
       isBlocked = true;
     }
   }
   else 
   {
     // The outbox cannot be used right now
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox end acknowledgement: %d", (int)result);
   }
+
 }
+
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) 
 {
@@ -176,7 +170,6 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context)
   else 
   {
     accel_data_service_unsubscribe();
-    send_end_ack();
   }
 }
 
@@ -185,6 +178,7 @@ static void click_config_provider(void *context)
   // Subcribe to button click events here
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
 }
+
 
 static void init()
 {
@@ -207,8 +201,9 @@ static void init()
   app_message_register_outbox_sent(out_sent_handler);
   app_message_register_outbox_failed(out_failed_handler);
   const uint32_t inbound_size = 128;
-  const uint32_t outbound_size = 128;
+  const uint32_t outbound_size = 1024;
   app_message_open(inbound_size, outbound_size);
+  app_comm_set_sniff_interval(SNIFF_INTERVAL_REDUCED);
 }
 
 static void deinit()
