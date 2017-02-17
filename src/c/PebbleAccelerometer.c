@@ -5,7 +5,6 @@
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static bool isCapturing = false;
-# jonny 1
 
 static void main_window_load(Window *window)
 {
