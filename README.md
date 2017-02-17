@@ -1,5 +1,5 @@
 # PebbleFace
-Capestone stuff
+Capstone stuff
 
 At FORCE our goal is to create a generic app system that will take
 input from any valid gesture device and use this gesture and location data
