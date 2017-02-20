@@ -2,7 +2,11 @@ package com.example.ben.androidgesture;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 
 import com.getpebble.android.kit.PebbleKit;
@@ -125,21 +129,21 @@ public class PebbleReceiver extends Activity {
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File root = new File(AndroidConstants.DIRECTORY_PATH);
-            File file = new File(root, "GestureData.csv");
+            File dir = new File(AndroidConstants.path);
+            dir.mkdirs();
+            File file = new File(AndroidConstants.path + AndroidConstants.fileName);
             if(!file.exists()){
                 file.createNewFile();
             }
-            FileOutputStream fOut = new FileOutputStream(file);
-            OutputStreamWriter outWriter = new OutputStreamWriter(fOut);
-            outWriter.append("START");
+            file.setReadable(true, false);
+            FileOutputStream stream = new FileOutputStream(file);
             for(AccelData i : pebbleAccelDataHolder.popData()){
-                outWriter.append(Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
-                        + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString());
+                stream.write((Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
+                        + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString() + "\n").getBytes());
             }
-            outWriter.append("END");
-            outWriter.close();
-            fOut.close();
+            MediaScannerConnection.scanFile(this, new String[] {dir.getAbsolutePath()}, null, null);
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+            stream.close();
         } catch(IOException e){
             Log.e("temp", "Failed when saving data to text file");
         }
