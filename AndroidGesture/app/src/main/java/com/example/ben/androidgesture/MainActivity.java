@@ -1,8 +1,6 @@
 package com.example.ben.androidgesture;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.view.View;
@@ -18,7 +16,6 @@ public class MainActivity extends ListActivity
         super.onCreate(savedInstanceState);
 
         String[] menu = {"Raw Accelerometer Vectors"};
-
         setListAdapter(new ArrayAdapter<String>(this, R.layout.simple_layout, menu));
     }
 
