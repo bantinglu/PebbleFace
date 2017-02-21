@@ -12,8 +12,8 @@ public class AndroidConstants {
 
     private AndroidConstants(){}
 
-    public static final String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/GestureData";
-    public static final String fileName = "/dataFile.txt";
+    public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/GestureData";
+    public static final String FILE_NAME = "/dataFile.txt";
 
     // The tuple key corresponding to a vector received from the watch
     public static final int PP_KEY_CMD = 128;
