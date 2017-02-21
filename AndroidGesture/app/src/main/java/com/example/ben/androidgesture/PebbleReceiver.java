@@ -129,9 +129,9 @@ public class PebbleReceiver extends Activity {
 
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File dir = new File(AndroidConstants.path);
+            File dir = new File(AndroidConstants.PATH);
             dir.mkdirs();
-            File file = new File(AndroidConstants.path + AndroidConstants.fileName);
+            File file = new File(AndroidConstants.PATH + AndroidConstants.FILE_NAME);
             if(!file.exists()){
                 file.createNewFile();
             }
@@ -145,7 +145,7 @@ public class PebbleReceiver extends Activity {
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             stream.close();
         } catch(IOException e){
-            Log.e("temp", "Failed when saving data to text file");
+            e.printStackTrace();
         }
     }
 
