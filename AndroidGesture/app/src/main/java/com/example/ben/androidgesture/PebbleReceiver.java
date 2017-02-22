@@ -152,6 +152,7 @@ public class PebbleReceiver extends Activity {
                 stream.write((Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
                         + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString() + "\n").getBytes());
             }
+            stream.write(( "\n").getBytes());
             MediaScannerConnection.scanFile(this, new String[] {dir.getAbsolutePath()}, null, null);
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             stream.close();
