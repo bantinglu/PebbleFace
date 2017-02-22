@@ -35,7 +35,6 @@ public class PebbleReceiver extends Activity {
     private static int vector[] = new int[3];
     private static RadioGroup radioGroup;
     private static RadioButton radioButton;
-    private static String whichFile;
 
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
@@ -75,7 +74,6 @@ public class PebbleReceiver extends Activity {
         pebbleAccelDataHolder  = new DataHolder();
         setContentView(R.layout.activity_main);
         PebbleKit.startAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_UUID);
-        whichFile = "Right";
 
         dataReceiver = new PebbleKit.PebbleDataReceiver(AndroidConstants.PEBBLE_UUID)
         {
@@ -144,7 +142,7 @@ public class PebbleReceiver extends Activity {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             File dir = new File(AndroidConstants.PATH);
             dir.mkdirs();
-            File file = new File(AndroidConstants.PATH + "/" + whichFile +".txt");
+            File file = new File(AndroidConstants.PATH + "/" + radioButton.getText() +".txt");
             if(!file.exists()){
                 file.createNewFile();
             }
@@ -178,26 +176,6 @@ public class PebbleReceiver extends Activity {
     public void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.radio_right:
-                if (checked)
-                    whichFile = "Right";
-                    break;
-            case R.id.radio_left:
-                if (checked)
-                    whichFile = "Left";
-                    break;
-            case R.id.radio_up:
-                if (checked)
-                    whichFile = "Up";
-                    break;
-            case R.id.radio_down:
-                if (checked)
-                    whichFile = "Down";
-                    break;
-        }
     }
 
 }
