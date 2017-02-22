@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 
+import com.example.ben.androidgesture.Utils.Gesture;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.example.ben.androidgesture.Constants.AndroidConstants;
@@ -19,6 +20,9 @@ import java.util.TimerTask;
 import java.io.*;
 import java.sql.Timestamp;
 
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
@@ -28,9 +32,10 @@ import android.widget.TextView;
  */
 
 public class PebbleReceiver extends Activity {
-
-
     private static int vector[] = new int[3];
+    private static RadioGroup radioGroup;
+    private static RadioButton radioButton;
+
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
     private Timer timer;
@@ -107,6 +112,7 @@ public class PebbleReceiver extends Activity {
         };
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -127,11 +133,16 @@ public class PebbleReceiver extends Activity {
 
     public void saveDataToFile(){
 
+        radioGroup = (RadioGroup)findViewById(R.id.radio_group);
+        int selectedId=radioGroup.getCheckedRadioButtonId();
+        radioButton=(RadioButton)findViewById(selectedId);
+        System.out.println(radioButton.getId());
+
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File dir = new File(AndroidConstants.path);
+            File dir = new File(AndroidConstants.PATH);
             dir.mkdirs();
-            File file = new File(AndroidConstants.path + AndroidConstants.fileName);
+            File file = new File(AndroidConstants.PATH + "/" + radioButton.getText() +".txt");
             if(!file.exists()){
                 file.createNewFile();
             }
@@ -141,6 +152,7 @@ public class PebbleReceiver extends Activity {
                 stream.write((Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
                         + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString() + "\n").getBytes());
             }
+            stream.write(( "\n").getBytes());
             MediaScannerConnection.scanFile(this, new String[] {dir.getAbsolutePath()}, null, null);
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             stream.close();
@@ -160,6 +172,11 @@ public class PebbleReceiver extends Activity {
                 saveDataToFile();
             }
         }, 2000);
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
     }
 
 }
