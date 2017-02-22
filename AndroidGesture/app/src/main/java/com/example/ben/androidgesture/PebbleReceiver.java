@@ -19,6 +19,9 @@ import java.util.TimerTask;
 import java.io.*;
 import java.sql.Timestamp;
 
+import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
@@ -28,10 +31,9 @@ import android.widget.TextView;
  */
 
 public class PebbleReceiver extends Activity {
-
-
     private static int vector[] = new int[3];
-
+    private static RadioGroup radioGroup;
+    private static RadioButton radioButton;
     private PebbleKit.PebbleDataReceiver dataReceiver;
     private Timer timer;
     private boolean saveNext = false;
@@ -107,6 +109,7 @@ public class PebbleReceiver extends Activity {
         };
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -127,11 +130,16 @@ public class PebbleReceiver extends Activity {
 
     public void saveDataToFile(){
 
+        radioGroup = (RadioGroup)findViewById(R.id.radio_group);
+        int selectedId=radioGroup.getCheckedRadioButtonId();
+        radioButton=(RadioButton)findViewById(selectedId);
+        System.out.println(radioButton.getId());
+
         try {
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            File dir = new File(AndroidConstants.path);
+            File dir = new File(AndroidConstants.PATH);
             dir.mkdirs();
-            File file = new File(AndroidConstants.path + AndroidConstants.fileName);
+            File file = new File(AndroidConstants.PATH + "/" + radioButton.getText() +".txt");
             if(!file.exists()){
                 file.createNewFile();
             }
@@ -160,6 +168,31 @@ public class PebbleReceiver extends Activity {
                 saveDataToFile();
             }
         }, 2000);
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radio_right:
+                if (checked)
+                    // Pirates are the best
+                    break;
+            case R.id.radio_left:
+                if (checked)
+                    // Ninjas rule
+                    break;
+            case R.id.radio_up:
+                if (checked)
+                    // Ninjas rule
+                    break;
+            case R.id.radio_down:
+                if (checked)
+                    // Ninjas rule
+                    break;
+        }
     }
 
 }
