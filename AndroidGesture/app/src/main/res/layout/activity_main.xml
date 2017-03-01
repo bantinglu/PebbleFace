@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.ben.androidgesture.MainActivity">
+
+    <TextView android:id="@+id/accelerometerX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="X: " />
+
+    <TextView android:id="@+id/accelerometerY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="Y: "
+
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="60dp" /> a/>
+
+    <TextView android:id="@+id/accelerometerZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="Z: "
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="120dp" />
+
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/accelerometerZ"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="45dp"
+        android:checkedButton = "@+id/radio_right" >
+
+        <RadioButton android:id="@+id/radio_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Right"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton android:id="@+id/radio_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Up"
+            android:onClick="onRadioButtonClicked"/>
+
+        <RadioButton android:id="@+id/radio_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Left"
+            android:onClick="onRadioButtonClicked"
+            android:layout_alignParentStart="true" />
+
+        <RadioButton android:id="@+id/radio_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Down"
+            android:onClick="onRadioButtonClicked"
+            android:layout_alignParentStart="true" />
+    </RadioGroup>
+
+    <TextView android:id="@+id/gestureText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:text="GestureResponse"
+        android:layout_below="@+id/radio_group"
+        android:layout_alignParentEnd="true" />
+
+    <TextView android:id="@+id/stillCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="Unable to determine"
+        android:layout_below="@+id/accelerometerZ"
+        android:layout_alignParentEnd="true" />
+
+    <Button android:id="@+id/sendRequest"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Send HTTP"
+        android:layout_below="@+id/gestureText"
+        android:onClick="sendRequest" />
+
+    <TextView android:id="@+id/sendRequestText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="Response"
+        android:layout_below="@+id/sendRequest"
+        android:layout_alignParentEnd="true" />
+
+    <Button android:id="@+id/findIPButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="FIND IP"
+        android:layout_below="@+id/sendRequestText"
+        android:onClick="findIP" />
+
+</RelativeLayout>

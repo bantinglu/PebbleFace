@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@android:id/text1"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:textAppearance="?android:attr/textAppearanceListItemSmall"
+android:gravity="center_vertical"
+android:minHeight="?android:attr/listPreferredItemHeightSmall">
+
+    <Button android:id="@+id/pebbleButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Collect Data"
+        android:onClick="startIntent" />
+
+    <TextView android:id="@+id/locationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:layout_below="@+id/pebbleButton"
+        android:text="Location Data" />
+
+    <Button android:id="@+id/checkGPSStatus"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="GPS Check"
+        android:layout_below="@+id/locationText"
+        android:onClick="checkGPS" />
+
+    <TextView android:id="@+id/GpsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:layout_below="@+id/checkGPSStatus"
+        android:text="Location" />
+
+</RelativeLayout>
+
+
