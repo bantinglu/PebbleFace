@@ -147,10 +147,10 @@ public class PebbleReceiver extends Activity {
                 file.createNewFile();
             }
             file.setReadable(true, false);
-            FileOutputStream stream = new FileOutputStream(file);
+            FileOutputStream stream = new FileOutputStream(file, true);
             for(AccelData i : pebbleAccelDataHolder.popData()){
                 stream.write((Integer.toString(i.getX()) + ", " + Integer.toString(i.getY())
-                        + ", " + Integer.toString(i.getY()) + ", " + timestamp.toString() + "\n").getBytes());
+                        + ", " + Integer.toString(i.getZ()) + ", " + timestamp.toString() + "\n").getBytes());
             }
             stream.write(( "\n").getBytes());
             MediaScannerConnection.scanFile(this, new String[] {dir.getAbsolutePath()}, null, null);
@@ -169,7 +169,8 @@ public class PebbleReceiver extends Activity {
             @Override
             public void run() {
                 pebbleAccelDataHolder.saveCurrentSet();
-                saveDataToFile();
+                if(pebbleAccelDataHolder.popData().size() > 0)
+                    saveDataToFile();
             }
         }, 2000);
     }

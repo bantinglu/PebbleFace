@@ -15,7 +15,7 @@ public class MainActivity extends ListActivity
     {
         super.onCreate(savedInstanceState);
 
-        String[] menu = {"Raw Accelerometer Vectors"};
+        String[] menu = {"Raw Accelerometer Vectors", "TapReceiver"};
         setListAdapter(new ArrayAdapter<String>(this, R.layout.simple_layout, menu));
     }
 
@@ -29,6 +29,9 @@ public class MainActivity extends ListActivity
         switch (position) {
             case 0:
                 intent = new Intent(this, PebbleReceiver.class);
+                break;
+            case 1:
+                intent = new Intent(this, TapReceiver.class);
                 break;
         }
 

@@ -30,4 +30,5 @@ public class AndroidConstants {
     public static final int VECTOR_INDEX_Y  = 1;
     public static final int VECTOR_INDEX_Z  = 2;
     public static final UUID PEBBLE_UUID = UUID.fromString("cf30b8b5-2cee-4f3a-bec8-234523a3ffe4");
+    public static final UUID PEBBLE_TAP_UUID = UUID.fromString("3fce53bf-082f-4c2b-a280-519fa6fd0856");
 }
