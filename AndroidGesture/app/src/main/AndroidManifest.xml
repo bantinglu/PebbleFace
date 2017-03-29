@@ -31,6 +31,13 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait">
         </activity>
+
+        <activity
+            android:name=".DeviceStatus"
+            android:label="DeviceStatus"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>
