@@ -33,12 +33,10 @@ public class StatusAdapter extends ArrayAdapter<StatusRow>
         }
 
         TextView deviceName = (TextView) convertView.findViewById(R.id.name);
-        TextView deviceDistance = (TextView) convertView.findViewById(R.id.distance);
         TextView deviceStatus = (TextView) convertView.findViewById(R.id.status);
 
         // Populate the data into the template view using the data object
         deviceName.setText("Name: " + sr.name);
-        deviceDistance.setText("Distance: " + sr.distance);
         deviceStatus.setText("Status: " + sr.status);
         // Return the completed view to render on screen
         return convertView;
