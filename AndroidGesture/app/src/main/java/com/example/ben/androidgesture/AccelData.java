@@ -10,11 +10,22 @@ public class AccelData
     private final int yData;
     private final int zData;
 
+    private long timestampData = 0;
+
     public AccelData(final int x, final int y, final int z)
     {
         this.xData = x;
         this.yData = y;
         this.zData = z;
+    }
+
+    public AccelData(final int x, final int y, final int z, final long timestamp)
+    {
+        this.xData = x;
+        this.yData = y;
+        this.zData = z;
+
+        this.timestampData = timestamp;
     }
 
     public int getX()
@@ -29,4 +40,6 @@ public class AccelData
     {
         return this.zData;
     }
+
+    public long getTime() { return this.timestampData; }
 }

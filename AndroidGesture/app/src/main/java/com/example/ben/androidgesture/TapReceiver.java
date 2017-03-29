@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.ben.androidgesture.Utils.Gesture;
@@ -22,6 +23,8 @@ import java.util.Timer;
  */
 
 public class TapReceiver extends Activity {
+
+    final private String deviceIp = "http://192.168.1.2:8081";
 
     private PebbleKit.PebbleDataReceiver dataReceiver;
     private long direction;
@@ -91,10 +94,21 @@ public class TapReceiver extends Activity {
     public void onPause() {
         super.onPause();
 
-        if (dataReceiver != null) {
+        if (dataReceiver != null)
+        {
             unregisterReceiver(dataReceiver);
             dataReceiver = null;
         }
         PebbleKit.closeAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_TAP_UUID);
+    }
+
+    public void selfDestruct(View view)
+    {
+        sendHTTP(deviceIp);
+    }
+
+    public void sendHTTP(final String url)
+    {
+
     }
 }
