@@ -26,7 +26,7 @@ import java.util.List;
  */
 
 public class DeviceStatus extends Activity {
-    private final String deviceIP = "http://192.168.1.2:8081";
+    private final String deviceIP = "192.168.1.2:8081";
     private final int NUMBER_OF_ITEMS = 3;
 
 
@@ -56,12 +56,11 @@ public class DeviceStatus extends Activity {
 
     public void selfDestruct(View view)
     {
-        sendHTTP(deviceIP+"/?hStatus");
-        optionOne.name = "Sheldon";
+        sendHTTP("http://" + deviceIP + "/?hStatus", 1);
         adapter.notifyDataSetChanged();
     }
 
-    public void sendHTTP(final String sendUrl) {
+    public void sendHTTP(final String sendUrl, final int device) {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -71,8 +70,13 @@ public class DeviceStatus extends Activity {
                     public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
                        // waitingOnRequest = false;
-                        //lastRequestPass = true;
-                        Log.d("myTag","Response succeeded");
+                        //lastRequestPass = true
+
+                        if(device == 1)
+                        {
+                            optionOne.name = deviceIP;
+                            optionOne.status = "ON";
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -80,6 +84,12 @@ public class DeviceStatus extends Activity {
                 //waitingOnRequest = false;
                 //lastRequestPass = false;
                 Log.d("myTag","That didn't work!");
+
+                if(device == 1)
+                {
+                    optionOne.name = deviceIP;
+                    optionOne.status = "OFF";
+                }
             }
         });
         // Add the request to the RequestQueue.

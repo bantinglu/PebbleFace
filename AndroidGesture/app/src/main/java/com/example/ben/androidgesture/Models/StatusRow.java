@@ -1,5 +1,7 @@
 package com.example.ben.androidgesture.Models;
 
+import android.media.Image;
+
 /**
  * Created by ben on 3/28/2017.
  */
@@ -13,5 +15,6 @@ public class StatusRow
     {
         this.name = name;
         this.status = status;
+
     }
 }

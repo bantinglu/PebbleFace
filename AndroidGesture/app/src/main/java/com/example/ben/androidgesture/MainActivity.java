@@ -9,6 +9,7 @@ import android.widget.ListView;
 
 public class MainActivity extends ListActivity
 {
+    Intent intent = null;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState)
@@ -25,7 +26,7 @@ public class MainActivity extends ListActivity
         super.onBackPressed();
     }
     protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
-        Intent intent = null;
+
         switch (position) {
             case 0:
                 intent = new Intent(this, PebbleReceiver.class);
