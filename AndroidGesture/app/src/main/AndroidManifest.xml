@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ben.androidgesture">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -10,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <uses-permission android:name="android.permission.VIBRATE"/>
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -20,8 +23,9 @@
         </activity>
         <activity
             android:name=".PebbleReceiver"
-            android:label="@string/app_name"
+            android:label="PebbleReceiver"
             android:configChanges="orientation"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
         </activity>
 
@@ -29,6 +33,7 @@
             android:name=".TapReceiver"
             android:label="TapReceiver"
             android:configChanges="orientation"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
         </activity>
 
