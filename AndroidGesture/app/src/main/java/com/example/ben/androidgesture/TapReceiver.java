@@ -24,8 +24,6 @@ import java.util.Timer;
 
 public class TapReceiver extends Activity {
 
-    final private String deviceIp = "http://192.168.1.2:8081";
-
     private PebbleKit.PebbleDataReceiver dataReceiver;
     private long direction;
     private long magnitude;
@@ -102,13 +100,5 @@ public class TapReceiver extends Activity {
         PebbleKit.closeAppOnPebble(getApplicationContext(), AndroidConstants.PEBBLE_TAP_UUID);
     }
 
-    public void selfDestruct(View view)
-    {
-        sendHTTP(deviceIp);
-    }
 
-    public void sendHTTP(final String url)
-    {
-
-    }
 }
