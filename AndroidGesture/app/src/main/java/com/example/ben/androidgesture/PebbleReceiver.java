@@ -14,7 +14,6 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.example.ben.androidgesture.Constants.AndroidConstants;
 
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -158,46 +157,8 @@ public class PebbleReceiver extends Activity {
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
             stream.close();
         } catch(IOException e){
-            e.printStackTrace();
+            Log.e("temp", "Failed when saving data to text file");
         }
-    }
-    public static ArrayList<AccelData> averageData(ArrayList<AccelData> data){
-        ArrayList<AccelData> modifiedData = new ArrayList<>();
-        if(data.size() < 5){
-            // reject data
-        }
-        final Integer numOfGroups = 5;
-        int remainder = data.size() % numOfGroups;
-        int groupSize = (data.size() - remainder)/numOfGroups;
-        ArrayList<Integer> groups = new ArrayList<>();
-        for(int i = 0; i < numOfGroups; i++){
-            groups.add(groupSize);
-        }
-        // spread remainder out
-        for(int i = 0; i < remainder; i++){
-            groups.set(i, groupSize+1);
-        }
-        int startIndex = 0;
-        int sumX = 0;
-        int sumY = 0;
-        int sumZ = 0;
-
-        for(Integer i: groups){
-            ArrayList<AccelData> temp = new ArrayList<AccelData>(data.subList(startIndex, i + startIndex));
-            startIndex += i;
-            for(AccelData accel: temp){
-                sumX += accel.getX();
-                sumY += accel.getY();
-                sumZ += accel.getZ();
-            }
-            AccelData avg = new AccelData(sumX/i, sumY/i, sumZ/i);
-            modifiedData.add(avg);
-            sumX = 0;
-            sumY = 0;
-            sumZ = 0;
-        }
-
-        return modifiedData;
     }
 
     private void resetTimer()
