@@ -26,27 +26,23 @@ import java.util.List;
  */
 
 public class DeviceStatus extends Activity {
-    final private String deviceIp = "http://192.168.1.7:8081";
+    private final String deviceIP = "http://192.168.1.2:8081";
     private final int NUMBER_OF_ITEMS = 3;
-    private final List<String> ITEMS =  Arrays.asList("Door", "Lights", "Ghost");
+
+
+    private StatusRow optionOne = new StatusRow("IP", "OFF");
+    private StatusRow optionTwo = new StatusRow("IP", "OFF");
+    ArrayList<StatusRow> arrayOfStatus = new ArrayList<StatusRow>();
+    private StatusAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.device_status_layout);
-
-        ArrayList<StatusRow> arrayOfStatus = new ArrayList<StatusRow>();
         // Create the adapter to convert the array to views
-        StatusAdapter adapter = new StatusAdapter(this, arrayOfStatus);
-
-        StatusRow newstatus = new StatusRow("Door", "San Diego", "Off");
-        adapter.add( newstatus);
-        newstatus = new StatusRow("Door", "San Diego", "Off");
-        adapter.add( newstatus);
-        newstatus = new StatusRow("Door", "San Diego", "Off");
-        adapter.add( newstatus);
-        newstatus = new StatusRow("Door", "San Diego", "Off");
-        adapter.add( newstatus);
+        adapter = new StatusAdapter(this, arrayOfStatus);
+        adapter.add(optionOne);
+        adapter.add(optionTwo);
 
         // Attach the adapter to a ListView
         ListView listView = (ListView) findViewById(R.id.listItems);
@@ -60,31 +56,37 @@ public class DeviceStatus extends Activity {
 
     public void selfDestruct(View view)
     {
-        Log.d("myTag", deviceIp+"/?hStatus");
-        sendHTTP(deviceIp+"/?hStatus");
+        sendHTTP(deviceIP+"/?hStatus");
+        optionOne.name = "Sheldon";
+        adapter.notifyDataSetChanged();
     }
 
-    public void sendHTTP(final String url)
-    {
+    public void sendHTTP(final String sendUrl) {
+
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>()
-                {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, sendUrl,
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(String response)
-                    {
+                    public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
-                        Log.d("myTag", "This is my message");
+                       // waitingOnRequest = false;
+                        //lastRequestPass = true;
+                        Log.d("myTag","Response succeeded");
                     }
                 }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error)
-            {
-                Log.d("myTag", "Go fuck yourself");
+            public void onErrorResponse(VolleyError error) {
+                //waitingOnRequest = false;
+                //lastRequestPass = false;
+                Log.d("myTag","That didn't work!");
             }
         });
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
     }
+
+
+
+
 }

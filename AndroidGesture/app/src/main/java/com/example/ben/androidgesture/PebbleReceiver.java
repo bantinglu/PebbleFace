@@ -69,7 +69,7 @@ public class PebbleReceiver extends Activity {
     private static int writeCount = 0;
 
     // For Static install
-    private String deviceIp = "http://192.168.1.7:8081";
+    private String deviceIp = "http://192.168.1.11:8081";
 
     // Threshold for gesture displacement
     private static int minGestureDisplaceThreshold = 100;
