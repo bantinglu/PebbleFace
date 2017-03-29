@@ -29,6 +29,7 @@ import java.util.Collection;
 
 public class MainActivity extends ListActivity implements BeaconConsumer, RangeNotifier
 {
+    Intent intent = null;
 
 
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 50;
@@ -72,7 +73,7 @@ public class MainActivity extends ListActivity implements BeaconConsumer, RangeN
     }
 
     protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
-        Intent intent = null;
+
         switch (position) {
             case 0:
                 intent = new Intent(this, PebbleReceiver.class);
