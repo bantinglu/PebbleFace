@@ -54,6 +54,11 @@ public class DeviceStatus extends Activity {
         super.onResume();
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
     public void selfDestruct(View view)
     {
         sendHTTP("http://" + deviceIP + "/?hStatus", 1);
